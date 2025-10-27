@@ -45,10 +45,12 @@ jobs:
 
       - name: Install terracost
         run: |
-          mkdir -p $HOME/go/bin
-          export PATH=$PATH:$HOME/go/bin
-          GO111MODULE=on go install github.com/cycloidio/terracost/cmd/terracost@latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
+          TERRACOST_VERSION=$(curl -s https://api.github.com/repos/cycloidio/terracost/releases/latest | grep tag_name | cut -d '"' -f 4)
+          curl -L -o terracost.tar.gz https://github.com/cycloidio/terracost/releases/download/${TERRACOST_VERSION}/terracost_${TERRACOST_VERSION#v}_linux_amd64.tar.gz
+          tar -xzf terracost.tar.gz
+          sudo mv terracost /usr/local/bin/
+          terracost version
+
 
       - name: Install terraform-docs
         run: |
