@@ -1,0 +1,64 @@
+name: Terraform Checks
+
+on:
+  push:
+    paths:
+      - '5.instance_module_with_tools/**'
+  pull_request:
+    paths:
+      - '5.instance_module_with_tools/**'
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 5.instance_module_with_tools
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.5
+
+      - name: Install TFLint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+
+      - name: Install TFSEC
+        run: |
+          curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+
+      - name: Install Terracost
+        run: |
+          mkdir -p $HOME/go/bin
+          export PATH=$HOME/go/bin:$PATH
+          GO111MODULE=on go install github.com/cycloidio/terracost/cmd/terracost@latest
+
+      - name: Install terraform-docs
+        run: |
+          TERRAFORM_DOCS_VERSION="0.18.2"
+          curl -Lo terraform-docs https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64
+          chmod +x terraform-docs
+          sudo mv terraform-docs /usr/local/bin/
+
+      - name: TFLint - module
+        run: tflint module
+
+      - name: TFLint - root
+        run: tflint .
+
+      - name: TFSEC - root
+        run: tfsec .
+
+      - name: Terracost
+        run: terracost plan --path .
+
+      - name: Terraform-docs - module
+        run: terraform-docs markdown table module > module/README.md
+
+      - name: Terraform-docs - root
+        run: terraform-docs markdown table . > README.md

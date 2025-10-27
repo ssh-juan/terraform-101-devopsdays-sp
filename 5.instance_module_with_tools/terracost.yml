@@ -1,4 +1,0 @@
-currency: BRL
-output: table
-skip-missing-prices: true
-provider: aws
