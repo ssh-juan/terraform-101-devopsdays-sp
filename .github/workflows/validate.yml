@@ -1,0 +1,71 @@
+name: Validate module (5.instance_module_with_tools)
+
+on:
+  push:
+    paths:
+      - '5.instance_module_with_tools/**'
+  pull_request:
+    paths:
+      - '5.instance_module_with_tools/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.8.5'
+
+      - name: Setup Go (for terracost & terraform-docs if installing via go)
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install utilities (curl, unzip)
+        run: sudo apt-get update && sudo apt-get install -y unzip jq
+
+      - name: Install tflint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+
+      - name: Install tfsec
+        run: |
+          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+
+      - name: Install terracost
+        run: |
+          mkdir -p $HOME/go/bin
+          export PATH=$PATH:$HOME/go/bin
+          GO111MODULE=on go install github.com/cycloidio/terracost/cmd/terracost@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Install terraform-docs
+        run: |
+          GO111MODULE=on go install github.com/terraform-docs/terraform-docs@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Show versions
+        run: |
+          terraform version
+          tflint --version
+          tfsec --version
+          terracost --version || true
+          terraform-docs --version || true
+          python3 --version
+
+      - name: Run validations for 5.instance_module_with_tools
+        working-directory: 5.instance_module_with_tools
+        run: |
+          chmod +x validate.sh || true
+          ./validate.sh
