@@ -22,10 +22,10 @@ jobs:
         with:
           terraform_version: '1.8.5'
 
-      - name: Setup Go (for terracost & terraform-docs if installing via go)
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.20'
+      # - name: Setup Go (for terracost & terraform-docs if installing via go)
+      #   uses: actions/setup-go@v4
+      #   with:
+      #     go-version: '1.20'
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -49,8 +49,9 @@ jobs:
           echo "Instalando Terracost versão $TERRACOST_VERSION"
           curl -L -o terracost.tar.gz https://github.com/cycloidio/terracost/releases/download/${TERRACOST_VERSION}/terracost_${TERRACOST_VERSION#v}_linux_amd64.tar.gz
           tar -xzf terracost.tar.gz
+          chmod +x terracost
           sudo mv terracost /usr/local/bin/
-          terracost version
+          terracost --version
 
       - name: Install terraform-docs
         run: |
