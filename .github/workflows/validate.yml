@@ -45,9 +45,11 @@ jobs:
 
       - name: Install terracost
         run: |
-          TERRACOST_VERSION=$(curl -s https://api.github.com/repos/cycloidio/terracost/releases/latest | grep tag_name | cut -d '"' -f 4)
-          echo "Instalando Terracost versão $TERRACOST_VERSION"
-          curl -L -o terracost.tar.gz https://github.com/cycloidio/terracost/releases/download/${TERRACOST_VERSION}/terracost_${TERRACOST_VERSION#v}_linux_amd64.tar.gz
+          sudo apt-get update && sudo apt-get install -y jq
+          TERRACOST_URL=$(curl -s https://api.github.com/repos/cycloidio/terracost/releases/latest \
+            | jq -r '.assets[] | select(.name | test("linux_amd64.tar.gz")) | .browser_download_url')
+          echo "Instalando Terracost a partir de $TERRACOST_URL"
+          curl -L -o terracost.tar.gz $TERRACOST_URL
           tar -xzf terracost.tar.gz
           chmod +x terracost
           sudo mv terracost /usr/local/bin/
