@@ -45,9 +45,13 @@ jobs:
         run: |
           curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
-      - name: Install Terraform-docs
+      - name: Install terraform-docs
         run: |
-          sudo apt-get update && sudo apt-get install -y terraform-docs
+          TERRAFORM_DOCS_VERSION="0.18.2"
+          curl -Lo terraform-docs.tar.gz https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz
+          tar -xzf terraform-docs.tar.gz
+          sudo mv terraform-docs /usr/local/bin/
+          terraform-docs version
 
       - name: Install Terracost
         run: |
