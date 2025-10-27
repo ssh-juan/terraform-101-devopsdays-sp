@@ -6,4 +6,4 @@ resource "aws_instance" "website" {
                           ami = var.ami
                           },
                            var.tags)
-}
+} 
