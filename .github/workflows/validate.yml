@@ -43,17 +43,25 @@ jobs:
         run: |
           curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
-      - name: Install terracost
+      # - name: Install terracost
+      #   run: |
+      #     sudo apt-get update && sudo apt-get install -y jq
+      #     TERRACOST_URL=$(curl -s https://api.github.com/repos/cycloidio/terracost/releases/latest \
+      #       | jq -r '.assets[] | select(.name | test("linux_amd64.tar.gz")) | .browser_download_url')
+      #     echo "Instalando Terracost a partir de $TERRACOST_URL"
+      #     curl -L -o terracost.tar.gz $TERRACOST_URL
+      #     tar -xzf terracost.tar.gz
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
+      #     terracost version
+      - name: Install Infracost
         run: |
-          sudo apt-get update && sudo apt-get install -y jq
-          TERRACOST_URL=$(curl -s https://api.github.com/repos/cycloidio/terracost/releases/latest \
-            | jq -r '.assets[] | select(.name | test("linux_amd64.tar.gz")) | .browser_download_url')
-          echo "Instalando Terracost a partir de $TERRACOST_URL"
-          curl -L -o terracost.tar.gz $TERRACOST_URL
-          tar -xzf terracost.tar.gz
-          chmod +x terracost
-          sudo mv terracost /usr/local/bin/
-          terracost version
+          curl -sSfL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
+          infracost --version
+
+      - name: Run Infracost diff
+        run: |
+          infracost breakdown --path 5.instance_module_with_tools
 
       - name: Install terraform-docs
         run: |
