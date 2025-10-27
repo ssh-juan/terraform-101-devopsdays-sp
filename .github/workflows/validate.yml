@@ -51,7 +51,7 @@ jobs:
           tar -xzf terracost.tar.gz
           chmod +x terracost
           sudo mv terracost /usr/local/bin/
-          terracost --version
+          terracost version
 
       - name: Install terraform-docs
         run: |
