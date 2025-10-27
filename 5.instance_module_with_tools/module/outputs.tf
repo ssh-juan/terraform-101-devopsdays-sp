@@ -4,7 +4,7 @@ output "instance_id" {
 
 output "public_ip" {
   value = aws_instance.website.public_ip
-}
+} 
 
 output "password" {
   value = random_password.password.result
