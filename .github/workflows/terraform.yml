@@ -80,47 +80,24 @@ jobs:
         with:
           go-version: '1.22'
           
-      - name: Build Terracost (with detailed debug)
+      - name: Install Terracost
         run: |
           cd /tmp
-          rm -rf terracost
           git clone https://github.com/cycloidio/terracost.git
           cd terracost
           
-          echo "=== Verificando Makefile ==="
-          if [ -f "Makefile" ]; then
-            cat Makefile
-            make build || make || true
-          fi
+          # Compila como um módulo Go completo
+          go build -v -o terracost-bin ./cmd/...
           
-          echo "=== Listando arquivos após make ==="
-          ls -la
-          find . -type f -executable -ls
+          # Ou tenta instalar direto
+          go install ./cmd/terracost
           
-          echo "=== Compilação manual ==="
-          go build -v -o /tmp/tc-binary
+          # Copia do GOPATH
+          sudo cp $(go env GOPATH)/bin/terracost /usr/local/bin/ || \
+          sudo cp terracost-bin /usr/local/bin/terracost
           
-          echo "=== Arquivo gerado ==="
-          file /tmp/tc-binary
-          ls -lh /tmp/tc-binary
-          
-          # Verifica se é realmente um executável ELF
-          if file /tmp/tc-binary | grep -q "ELF.*executable"; then
-            echo "✓ Binário ELF válido"
-            sudo install -m 755 /tmp/tc-binary /usr/local/bin/terracost
-          else
-            echo "✗ ERRO: Não é um executável ELF!"
-            hexdump -C /tmp/tc-binary | head -3
-            exit 1
-          fi
-          
-      - name: Verify before run
-        run: |
-          echo "=== Arquivo final ==="
-          file /usr/local/bin/terracost
-          ls -lh /usr/local/bin/terracost
-          hexdump -C /usr/local/bin/terracost | head -2
-          
+          terracost --version || terracost --help
+
       - name: Install terraform-docs
         run: |
           TERRAFORM_DOCS_VERSION="0.18.2"
