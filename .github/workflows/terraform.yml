@@ -1,174 +1,30 @@
-# name: Terraform Checks
-
-# # on:
-# #   push:
-# #     paths:
-# #       - '5.instance_module_with_tools/**'
-# #   pull_request:
-# #     paths:
-# #       - '5.instance_module_with_tools/**'
-# on:
-#   workflow_dispatch:
-
-# jobs:
-#   terraform:
-#     runs-on: ubuntu-latest
-#     defaults:
-#       run:
-#         working-directory: 5.instance_module_with_tools
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-
-#       - name: Setup Terraform
-#         uses: hashicorp/setup-terraform@v2
-#         with:
-#           terraform_version: 1.7.5
-
-#       - name: Install TFLint
-#         run: |
-#           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-
-#       - name: Install TFSEC
-#         run: |
-#           curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
-
-#       # - name: Install Terracost
-#       #   run: |
-#       #     TERRACOST_VERSION="0.5.1"
-#       #     curl -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
-#       #     chmod +x terracost
-#       #     sudo mv terracost /usr/local/bin/
-#       # - name: Install Terracost
-#       #   run: |
-#       #     TERRACOST_VERSION="0.5.1"
-#       #     # Baixa o binário correto do release
-#       #     curl -fsSL -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
-#       #     chmod +x terracost
-#       #     sudo mv terracost /usr/local/bin/
-#       # - name: Install Terracost
-#       #   run: |
-#       #     git clone https://github.com/cycloidio/terracost.git
-#       #     cd terracost
-#       #     go build -o terracost
-#       #     chmod +x terracost            # garante permissão de execução
-#       #     sudo mv terracost /usr/local/bin/
-#       # - name: Build Terracost
-#       #   run: |
-#       #     cd /tmp
-#       #     git clone https://github.com/cycloidio/terracost.git
-#       #     cd terracost
-#       #     go build -o terracost ./cmd/terracost
-#       #     chmod +x terracost
-#       #     sudo mv terracost /usr/local/bin/
-#       # - name: Build Terracost
-#       #   run: |
-#       #     cd /tmp
-#       #     git clone https://github.com/cycloidio/terracost.git
-#       #     cd terracost
-#       #     echo "=== Estrutura do projeto ==="
-#       #     ls -la
-#       #     echo "=== Procurando main.go ==="
-#       #     find . -name "main.go" | head -5
-#       #     echo "=== Compilando ==="
-#       #     go build -o terracost
-#       #     chmod +x terracost
-#       #     sudo mv terracost /usr/local/bin/
-#       - name: Setup Go
-#         uses: actions/setup-go@v5
-#         with:
-#           go-version: '1.22'
-          
-#       - name: Build Terracost
-#         run: |
-#           cd /tmp
-#           rm -rf terracost
-#           git clone https://github.com/cycloidio/terracost.git
-#           cd terracost
-          
-#           echo "=== Compilando terracost ==="
-#           # O main está em examples/terracost.go
-#           go build -v -o /tmp/terracost-bin ./examples/terracost.go
-          
-#           echo "=== Verificando binário ==="
-#           file /tmp/terracost-bin
-#           ls -lh /tmp/terracost-bin
-          
-#           if file /tmp/terracost-bin | grep -q "ELF.*executable"; then
-#             sudo install -m 755 /tmp/terracost-bin /usr/local/bin/terracost
-#             echo "✓ Terracost instalado com sucesso"
-#             terracost --version || terracost --help || echo "Binário OK"
-#           else
-#             echo "✗ Falha - não é um executável ELF"
-#             exit 1
-#           fi
-          
-#       - name: Run Terracost
-#         run: terracost plan --path .
-
-#       - name: Install terraform-docs
-#         run: |
-#           TERRAFORM_DOCS_VERSION="0.18.2"
-#           curl -Lo terraform-docs https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64
-#           chmod +x terraform-docs
-#           sudo mv terraform-docs /usr/local/bin/
-
-#       - name: TFLint - module
-#         run: tflint --chdir module
-
-#       - name: TFLint - root
-#         run: tflint --chdir .
-
-#       - name: Run TFSEC and save result
-#         id: tfsec
-#         run: |
-#           tfsec . || echo "::set-output name=failed::true"
-
-#       - name: Terracost
-#         run: terracost plan --path .
-
-#       - name: Terraform-docs - module
-#         run: terraform-docs markdown table module > module/README.md
-
-#       - name: Terraform-docs - root
-#         run: terraform-docs markdown table . > README.md
-
-#       - name: Fail job if TFSEC found issues
-#         if: steps.tfsec.outputs.failed == 'true'
-#         run: exit 1
 name: Terraform Checks
 
+# on:
+#   push:
+#     paths:
+#       - '5.instance_module_with_tools/**'
+#   pull_request:
+#     paths:
+#       - '5.instance_module_with_tools/**'
 on:
-  # push:
-  #   paths:
-  #     - '5.instance_module_with_tools/**'
-  # pull_request:
-  #   paths:
-  #     - '5.instance_module_with_tools/**'
   workflow_dispatch:
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    # Proteção para repos públicos: só roda se não for fork
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
-    
     defaults:
       run:
         working-directory: 5.instance_module_with_tools
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.7.5
-
-      - name: Terraform Init
-        run: terraform init
 
       - name: Install TFLint
         run: |
@@ -178,10 +34,51 @@ jobs:
         run: |
           curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
+      # - name: Install Terracost
+      #   run: |
+      #     TERRACOST_VERSION="0.5.1"
+      #     curl -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
+      # - name: Install Terracost
+      #   run: |
+      #     TERRACOST_VERSION="0.5.1"
+      #     # Baixa o binário correto do release
+      #     curl -fsSL -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
+      # - name: Install Terracost
+      #   run: |
+      #     git clone https://github.com/cycloidio/terracost.git
+      #     cd terracost
+      #     go build -o terracost
+      #     chmod +x terracost            # garante permissão de execução
+      #     sudo mv terracost /usr/local/bin/
+      # - name: Build Terracost
+      #   run: |
+      #     cd /tmp
+      #     git clone https://github.com/cycloidio/terracost.git
+      #     cd terracost
+      #     go build -o terracost ./cmd/terracost
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
+      # - name: Build Terracost
+      #   run: |
+      #     cd /tmp
+      #     git clone https://github.com/cycloidio/terracost.git
+      #     cd terracost
+      #     echo "=== Estrutura do projeto ==="
+      #     ls -la
+      #     echo "=== Procurando main.go ==="
+      #     find . -name "main.go" | head -5
+      #     echo "=== Compilando ==="
+      #     go build -o terracost
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
       - name: Setup Infracost
-        uses: infracost/actions/setup@v3
+        uses: infracost/actions/setup@v2
         with:
-          api-key: ${{ secrets.INFRACOST_API_KEY }}
+          version: latest
 
       - name: Install terraform-docs
         run: |
@@ -199,27 +96,20 @@ jobs:
       - name: Run TFSEC and save result
         id: tfsec
         run: |
-          tfsec . || echo "failed=true" >> $GITHUB_OUTPUT
+          tfsec . || echo "::set-output name=failed::true"
 
       - name: Infracost breakdown
+        env:
+          INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
         run: |
-          infracost breakdown --path . \
-            --format table \
-            --show-skipped
+          infracost breakdown --path 5.instance_module_with_tools --format json --out-file infracost.json
 
-      - name: Generate Infracost JSON for PR comment
+      - name: Infracost comment PR
         if: github.event_name == 'pull_request'
+        env:
+          INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
         run: |
-          infracost breakdown --path . \
-            --format json \
-            --out-file /tmp/infracost.json
-
-      - name: Post Infracost comment on PR
-        if: github.event_name == 'pull_request'
-        uses: infracost/actions/comment@v3
-        with:
-          path: /tmp/infracost.json
-          behavior: update
+          infracost comment github --path infracost.json
 
       - name: Terraform-docs - module
         run: terraform-docs markdown table module > module/README.md
