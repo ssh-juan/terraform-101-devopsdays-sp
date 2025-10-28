@@ -80,23 +80,41 @@ jobs:
         with:
           go-version: '1.22'
           
-      - name: Install Terracost
+      - name: Build Terracost
         run: |
           cd /tmp
+          rm -rf terracost
           git clone https://github.com/cycloidio/terracost.git
           cd terracost
           
-          # Compila como um módulo Go completo
-          go build -v -o terracost-bin ./cmd/...
+          echo "=== Procurando package main ==="
+          find . -name "*.go" -exec grep -l "package main" {} \; | grep -v vendor | head -5
           
-          # Ou tenta instalar direto
-          go install ./cmd/terracost
+          echo "=== Compilando do diretório cmd ==="
+          # Terracost provavelmente tem o main em cmd/terracost
+          if [ -d "cmd" ]; then
+            cd cmd
+            # Encontra o diretório com package main
+            MAIN_PKG=$(find . -name "*.go" -exec grep -l "package main" {} \; | head -1 | xargs dirname)
+            cd "$MAIN_PKG"
+            go build -v -o /tmp/terracost-bin
+          else
+            go build -v -o /tmp/terracost-bin ./...
+          fi
           
-          # Copia do GOPATH
-          sudo cp $(go env GOPATH)/bin/terracost /usr/local/bin/ || \
-          sudo cp terracost-bin /usr/local/bin/terracost
+          echo "=== Verificando binário ==="
+          file /tmp/terracost-bin
           
-          terracost --version || terracost --help
+          if file /tmp/terracost-bin | grep -q "ELF.*executable"; then
+            sudo install -m 755 /tmp/terracost-bin /usr/local/bin/terracost
+            echo "✓ Instalado com sucesso"
+          else
+            echo "✗ Falha ao criar executável"
+            exit 1
+          fi
+          
+      - name: Run Terracost
+        run: terracost plan --path .
 
       - name: Install terraform-docs
         run: |
