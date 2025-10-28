@@ -54,14 +54,22 @@ jobs:
       #     go build -o terracost
       #     chmod +x terracost            # garante permissão de execução
       #     sudo mv terracost /usr/local/bin/
-      - name: Build Terracost
+      # - name: Build Terracost
+      #   run: |
+      #     cd /tmp
+      #     git clone https://github.com/cycloidio/terracost.git
+      #     cd terracost
+      #     go build -o terracost ./cmd/terracost
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
+      - name: Install Terracost
         run: |
-          cd /tmp
-          git clone https://github.com/cycloidio/terracost.git
-          cd terracost
-          go build -o terracost ./cmd/terracost
+          TERRACOST_VERSION="v0.4.2"  # ou latest
+          wget "https://github.com/cycloidio/terracost/releases/download/${TERRACOST_VERSION}/terracost-linux-amd64" -O terracost
           chmod +x terracost
-          sudo mv terracost /usr/local/bin/
+          sudo mv terracost /usr/local/bin/terracost
+      - name: Verify Terracost
+        run: terracost --version || terracost --help
 
       - name: Install terraform-docs
         run: |
