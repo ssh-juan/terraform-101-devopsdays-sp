@@ -56,9 +56,10 @@ jobs:
       #     sudo mv terracost /usr/local/bin/
       - name: Build Terracost
         run: |
+          cd /tmp
           git clone https://github.com/cycloidio/terracost.git
           cd terracost
-          GOOS=linux GOARCH=amd64 go build -o terracost ./cmd/terracost
+          go build -o terracost ./cmd/terracost
           chmod +x terracost
           sudo mv terracost /usr/local/bin/
 
