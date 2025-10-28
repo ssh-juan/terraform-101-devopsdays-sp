@@ -80,42 +80,47 @@ jobs:
         with:
           go-version: '1.22'
           
-      - name: Build Terracost
+      - name: Build Terracost (with detailed debug)
         run: |
           cd /tmp
           rm -rf terracost
           git clone https://github.com/cycloidio/terracost.git
           cd terracost
           
-          echo "=== Estrutura do projeto ==="
-          ls -la
-          cat go.mod | head -20
-          
-          echo "=== Procurando package main ==="
-          grep -r "package main" --include="*.go" . | head -5
-          
-          echo "=== Tentando compilar com caminho explícito ==="
-          if [ -f "main.go" ]; then
-            go build -v -o /tmp/terracost-exec main.go
-          elif [ -d "cmd/terracost" ]; then
-            go build -v -o /tmp/terracost-exec ./cmd/terracost
-          else
-            go build -v -o /tmp/terracost-exec .
+          echo "=== Verificando Makefile ==="
+          if [ -f "Makefile" ]; then
+            cat Makefile
+            make build || make || true
           fi
           
-          echo "=== Verificando o binário ==="
-          file /tmp/terracost-exec
-          ls -lh /tmp/terracost-exec
-          /tmp/terracost-exec --help || /tmp/terracost-exec version || echo "Binary exists"
+          echo "=== Listando arquivos após make ==="
+          ls -la
+          find . -type f -executable -ls
           
-          sudo cp /tmp/terracost-exec /usr/local/bin/terracost
-          sudo chmod +x /usr/local/bin/terracost
+          echo "=== Compilação manual ==="
+          go build -v -o /tmp/tc-binary
           
-      - name: Final Verification
+          echo "=== Arquivo gerado ==="
+          file /tmp/tc-binary
+          ls -lh /tmp/tc-binary
+          
+          # Verifica se é realmente um executável ELF
+          if file /tmp/tc-binary | grep -q "ELF.*executable"; then
+            echo "✓ Binário ELF válido"
+            sudo install -m 755 /tmp/tc-binary /usr/local/bin/terracost
+          else
+            echo "✗ ERRO: Não é um executável ELF!"
+            hexdump -C /tmp/tc-binary | head -3
+            exit 1
+          fi
+          
+      - name: Verify before run
         run: |
+          echo "=== Arquivo final ==="
           file /usr/local/bin/terracost
-          head -c 20 /usr/local/bin/terracost | od -c
-
+          ls -lh /usr/local/bin/terracost
+          hexdump -C /usr/local/bin/terracost | head -2
+          
       - name: Install terraform-docs
         run: |
           TERRAFORM_DOCS_VERSION="0.18.2"
