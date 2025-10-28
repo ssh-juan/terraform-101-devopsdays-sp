@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Terracost
         run: |
-          TERRACOST_VERSION="0.5.2"
+          TERRACOST_VERSION="0.5.1"
           curl -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
           chmod +x terracost
           sudo mv terracost /usr/local/bin/
