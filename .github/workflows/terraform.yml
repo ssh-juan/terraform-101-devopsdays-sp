@@ -40,12 +40,18 @@ jobs:
       #     curl -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
       #     chmod +x terracost
       #     sudo mv terracost /usr/local/bin/
-      - name: Install Terracost
+      # - name: Install Terracost
+      #   run: |
+      #     TERRACOST_VERSION="0.5.1"
+      #     # Baixa o binário correto do release
+      #     curl -fsSL -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
+      - name: Instalar o Terracost
         run: |
-          TERRACOST_VERSION="0.5.1"
-          # Baixa o binário correto do release
-          curl -fsSL -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
-          chmod +x terracost
+          git clone https://github.com/cycloidio/terracost.git
+          cd terracost
+          go build -o terracost
           sudo mv terracost /usr/local/bin/
 
       - name: Install terraform-docs
