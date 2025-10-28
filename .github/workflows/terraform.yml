@@ -83,10 +83,12 @@ jobs:
       - name: Install terraform-docs
         run: |
           TERRAFORM_DOCS_VERSION="0.18.2"
-          curl -Lo terraform-docs https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64
+          wget -q https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz
+          tar -xzf terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz
           chmod +x terraform-docs
           sudo mv terraform-docs /usr/local/bin/
-
+          terraform-docs --version
+          
       - name: TFLint - module
         run: tflint --chdir module
 
@@ -99,17 +101,14 @@ jobs:
           tfsec . || echo "::set-output name=failed::true"
 
       - name: Infracost breakdown
+        working-directory: 5.instance_module_with_tools
+        run: |
+          terraform init -input=false
+          terraform plan -out=tfplan.binary
+          terraform show -json tfplan.binary > tfplan.json
+          infracost breakdown --path tfplan.json --format table
         env:
           INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
-        run: |
-          infracost breakdown --path 5.instance_module_with_tools --format json --out-file infracost.json
-
-      - name: Infracost comment PR
-        if: github.event_name == 'pull_request'
-        env:
-          INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
-        run: |
-          infracost comment github --path infracost.json
 
       - name: Terraform-docs - module
         run: terraform-docs markdown table module > module/README.md
