@@ -78,18 +78,33 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: '1.22'  # Versão mínima necessária
           
-      - name: Install Terracost
+      - name: Build Terracost
         run: |
-          GOBIN=/tmp/gobin go install github.com/cycloidio/terracost@latest
-          sudo cp /tmp/gobin/terracost /usr/local/bin/
-          chmod +x /usr/local/bin/terracost
+          TEMP_DIR=$(mktemp -d)
+          cd "$TEMP_DIR"
           
-      - name: Verify Installation
-        run: |
+          git clone https://github.com/cycloidio/terracost.git
+          cd terracost
+          
+          echo "=== Baixando dependências ==="
+          go mod download
+          
+          echo "=== Compilando ==="
+          go build -v -o terracost-binary
+          
+          echo "=== Verificando tipo do arquivo ==="
+          file terracost-binary
+          ls -lh terracost-binary
+          
+          # Testa o binário antes de mover
+          ./terracost-binary --help || ./terracost-binary version || echo "Binary created"
+          
+          sudo install -m 755 terracost-binary /usr/local/bin/terracost
+          
+          echo "=== Verificando instalação ==="
           file /usr/local/bin/terracost
-          terracost --help || terracost version
 
       - name: Install terraform-docs
         run: |
