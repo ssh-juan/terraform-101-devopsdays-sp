@@ -3,6 +3,7 @@ variable "ami" {
   description = "Imagem Utilizada para subir a instância"
 }
 variable "instance_type" {
+    type = string
     description = "Tipo de Instância"
 }
 
