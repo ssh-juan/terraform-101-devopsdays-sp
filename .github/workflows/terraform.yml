@@ -49,10 +49,10 @@ jobs:
           sudo mv terraform-docs /usr/local/bin/
 
       - name: TFLint - module
-        run: tflint --chdir module --ignore-warnings
+        run: tflint --chdir module
 
       - name: TFLint - root
-        run: tflint --chdir . --ignore-warnings
+        run: tflint --chdir .
 
       - name: TFSEC - root
         run: tfsec .
