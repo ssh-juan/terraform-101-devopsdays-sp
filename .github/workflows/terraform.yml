@@ -1,12 +1,14 @@
 name: Terraform Checks
 
+# on:
+#   push:
+#     paths:
+#       - '5.instance_module_with_tools/**'
+#   pull_request:
+#     paths:
+#       - '5.instance_module_with_tools/**'
 on:
-  push:
-    paths:
-      - '5.instance_module_with_tools/**'
-  pull_request:
-    paths:
-      - '5.instance_module_with_tools/**'
+  workflow_dispatch:
 
 jobs:
   terraform:
