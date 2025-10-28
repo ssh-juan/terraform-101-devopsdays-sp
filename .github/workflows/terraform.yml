@@ -62,25 +62,34 @@ jobs:
       #     go build -o terracost ./cmd/terracost
       #     chmod +x terracost
       #     sudo mv terracost /usr/local/bin/
-      - name: Build Terracost
-        run: |
-          cd /tmp
-          git clone https://github.com/cycloidio/terracost.git
-          cd terracost
-          echo "=== Estrutura do projeto ==="
-          ls -la
-          echo "=== Procurando main.go ==="
-          find . -name "main.go" | head -5
-          echo "=== Compilando ==="
-          go build -o terracost
-          chmod +x terracost
-          sudo mv terracost /usr/local/bin/
+      # - name: Build Terracost
+      #   run: |
+      #     cd /tmp
+      #     git clone https://github.com/cycloidio/terracost.git
+      #     cd terracost
+      #     echo "=== Estrutura do projeto ==="
+      #     ls -la
+      #     echo "=== Procurando main.go ==="
+      #     find . -name "main.go" | head -5
+      #     echo "=== Compilando ==="
+      #     go build -o terracost
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
           
-      - name: Verify Terracost
+      - name: Install Terracost
         run: |
-          which terracost
+          GOBIN=/tmp/gobin go install github.com/cycloidio/terracost@latest
+          sudo cp /tmp/gobin/terracost /usr/local/bin/
+          chmod +x /usr/local/bin/terracost
+          
+      - name: Verify Installation
+        run: |
           file /usr/local/bin/terracost
-          terracost --help || true
+          terracost --help || terracost version
 
       - name: Install terraform-docs
         run: |
