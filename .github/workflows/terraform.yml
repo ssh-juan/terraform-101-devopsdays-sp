@@ -80,15 +80,6 @@ jobs:
         with:
           version: latest
 
-      - name: Install terraform-docs
-        run: |
-          TERRAFORM_DOCS_VERSION="0.18.2"
-          wget -q https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz
-          tar -xzf terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz
-          chmod +x terraform-docs
-          sudo mv terraform-docs /usr/local/bin/
-          terraform-docs --version
-          
       - name: TFLint - module
         run: tflint --chdir module
 
@@ -110,11 +101,21 @@ jobs:
         env:
           INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
 
-      - name: Terraform-docs - module
-        run: terraform-docs markdown table module > module/README.md
+      - name: Generate terraform-docs - module
+        uses: terraform-docs/gh-actions@v1.2.0
+        with:
+          working-dir: 5.instance_module_with_tools/module
+          output-file: README.md
+          output-method: inject
+          git-push: false
 
-      - name: Terraform-docs - root
-        run: terraform-docs markdown table . > README.md
+      - name: Generate terraform-docs - root
+        uses: terraform-docs/gh-actions@v1.2.0
+        with:
+          working-dir: 5.instance_module_with_tools
+          output-file: README.md
+          output-method: inject
+          git-push: false
 
       - name: Fail job if TFSEC found issues
         if: steps.tfsec.outputs.failed == 'true'
