@@ -34,10 +34,17 @@ jobs:
         run: |
           curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
+      # - name: Install Terracost
+      #   run: |
+      #     TERRACOST_VERSION="0.5.1"
+      #     curl -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
+      #     chmod +x terracost
+      #     sudo mv terracost /usr/local/bin/
       - name: Install Terracost
         run: |
           TERRACOST_VERSION="0.5.1"
-          curl -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
+          # Baixa o binário correto do release
+          curl -fsSL -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
           chmod +x terracost
           sudo mv terracost /usr/local/bin/
 
