@@ -78,33 +78,43 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'  # Versão mínima necessária
+          go-version: '1.22'
           
       - name: Build Terracost
         run: |
-          TEMP_DIR=$(mktemp -d)
-          cd "$TEMP_DIR"
-          
+          cd /tmp
+          rm -rf terracost
           git clone https://github.com/cycloidio/terracost.git
           cd terracost
           
-          echo "=== Baixando dependências ==="
-          go mod download
+          echo "=== Estrutura do projeto ==="
+          ls -la
+          cat go.mod | head -20
           
-          echo "=== Compilando ==="
-          go build -v -o terracost-binary
+          echo "=== Procurando package main ==="
+          grep -r "package main" --include="*.go" . | head -5
           
-          echo "=== Verificando tipo do arquivo ==="
-          file terracost-binary
-          ls -lh terracost-binary
+          echo "=== Tentando compilar com caminho explícito ==="
+          if [ -f "main.go" ]; then
+            go build -v -o /tmp/terracost-exec main.go
+          elif [ -d "cmd/terracost" ]; then
+            go build -v -o /tmp/terracost-exec ./cmd/terracost
+          else
+            go build -v -o /tmp/terracost-exec .
+          fi
           
-          # Testa o binário antes de mover
-          ./terracost-binary --help || ./terracost-binary version || echo "Binary created"
+          echo "=== Verificando o binário ==="
+          file /tmp/terracost-exec
+          ls -lh /tmp/terracost-exec
+          /tmp/terracost-exec --help || /tmp/terracost-exec version || echo "Binary exists"
           
-          sudo install -m 755 terracost-binary /usr/local/bin/terracost
+          sudo cp /tmp/terracost-exec /usr/local/bin/terracost
+          sudo chmod +x /usr/local/bin/terracost
           
-          echo "=== Verificando instalação ==="
+      - name: Final Verification
+        run: |
           file /usr/local/bin/terracost
+          head -c 20 /usr/local/bin/terracost | od -c
 
       - name: Install terraform-docs
         run: |
