@@ -87,29 +87,20 @@ jobs:
           git clone https://github.com/cycloidio/terracost.git
           cd terracost
           
-          echo "=== Procurando package main ==="
-          find . -name "*.go" -exec grep -l "package main" {} \; | grep -v vendor | head -5
-          
-          echo "=== Compilando do diretório cmd ==="
-          # Terracost provavelmente tem o main em cmd/terracost
-          if [ -d "cmd" ]; then
-            cd cmd
-            # Encontra o diretório com package main
-            MAIN_PKG=$(find . -name "*.go" -exec grep -l "package main" {} \; | head -1 | xargs dirname)
-            cd "$MAIN_PKG"
-            go build -v -o /tmp/terracost-bin
-          else
-            go build -v -o /tmp/terracost-bin ./...
-          fi
+          echo "=== Compilando terracost ==="
+          # O main está em examples/terracost.go
+          go build -v -o /tmp/terracost-bin ./examples/terracost.go
           
           echo "=== Verificando binário ==="
           file /tmp/terracost-bin
+          ls -lh /tmp/terracost-bin
           
           if file /tmp/terracost-bin | grep -q "ELF.*executable"; then
             sudo install -m 755 /tmp/terracost-bin /usr/local/bin/terracost
-            echo "✓ Instalado com sucesso"
+            echo "✓ Terracost instalado com sucesso"
+            terracost --version || terracost --help || echo "Binário OK"
           else
-            echo "✗ Falha ao criar executável"
+            echo "✗ Falha - não é um executável ELF"
             exit 1
           fi
           
