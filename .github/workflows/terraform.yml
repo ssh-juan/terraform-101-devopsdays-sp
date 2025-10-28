@@ -54,8 +54,10 @@ jobs:
       - name: TFLint - root
         run: tflint --chdir .
 
-      - name: TFSEC - root
-        run: tfsec .
+      - name: Run TFSEC and save result
+        id: tfsec
+        run: |
+          tfsec . || echo "::set-output name=failed::true"
 
       - name: Terracost
         run: terracost plan --path .
@@ -65,3 +67,7 @@ jobs:
 
       - name: Terraform-docs - root
         run: terraform-docs markdown table . > README.md
+
+      - name: Fail job if TFSEC found issues
+        if: steps.tfsec.outputs.failed == 'true'
+        run: exit 1
