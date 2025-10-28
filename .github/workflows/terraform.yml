@@ -1,12 +1,5 @@
 name: Terraform Checks
 
-# on:
-#   push:
-#     paths:
-#       - '5.instance_module_with_tools/**'
-#   pull_request:
-#     paths:
-#       - '5.instance_module_with_tools/**'
 on:
   workflow_dispatch:
 
@@ -34,47 +27,6 @@ jobs:
         run: |
           curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
-      # - name: Install Terracost
-      #   run: |
-      #     TERRACOST_VERSION="0.5.1"
-      #     curl -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
-      #     chmod +x terracost
-      #     sudo mv terracost /usr/local/bin/
-      # - name: Install Terracost
-      #   run: |
-      #     TERRACOST_VERSION="0.5.1"
-      #     # Baixa o binário correto do release
-      #     curl -fsSL -Lo terracost https://github.com/cycloidio/terracost/releases/download/v${TERRACOST_VERSION}/terracost-linux-amd64
-      #     chmod +x terracost
-      #     sudo mv terracost /usr/local/bin/
-      # - name: Install Terracost
-      #   run: |
-      #     git clone https://github.com/cycloidio/terracost.git
-      #     cd terracost
-      #     go build -o terracost
-      #     chmod +x terracost            # garante permissão de execução
-      #     sudo mv terracost /usr/local/bin/
-      # - name: Build Terracost
-      #   run: |
-      #     cd /tmp
-      #     git clone https://github.com/cycloidio/terracost.git
-      #     cd terracost
-      #     go build -o terracost ./cmd/terracost
-      #     chmod +x terracost
-      #     sudo mv terracost /usr/local/bin/
-      # - name: Build Terracost
-      #   run: |
-      #     cd /tmp
-      #     git clone https://github.com/cycloidio/terracost.git
-      #     cd terracost
-      #     echo "=== Estrutura do projeto ==="
-      #     ls -la
-      #     echo "=== Procurando main.go ==="
-      #     find . -name "main.go" | head -5
-      #     echo "=== Compilando ==="
-      #     go build -o terracost
-      #     chmod +x terracost
-      #     sudo mv terracost /usr/local/bin/
       - name: Setup Infracost
         uses: infracost/actions/setup@v2
         with:
