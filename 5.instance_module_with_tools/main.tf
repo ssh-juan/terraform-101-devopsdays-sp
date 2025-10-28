@@ -4,7 +4,7 @@ module "instance" {
 
     ami = "ami-0360c520857e3138f" #Ubuntu
     instance_type = "t3.micro"
-}
+} 
 
 module "instance_2" {
     source = "./module/"
